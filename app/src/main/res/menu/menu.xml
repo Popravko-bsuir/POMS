@@ -35,6 +35,9 @@
         android:id="@+id/clearId"
         android:title="@string/clear" />
     <item
+        android:title="Load"
+        android:id="@+id/new_btn" />
+    <item
         android:id="@+id/lineWidh"
         android:icon="@drawable/baseline_brush_black_18dp"
         android:title="@string/lineWidth"

@@ -4,10 +4,13 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -17,6 +20,9 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.Toast;
+
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 
 import by.bsuir.popravko.paint.view.PaintView;
 import by.bsuir.popravko.paint.view.PaintView2;
@@ -41,6 +47,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         paintView = findViewById(R.id.view);
+
+        paintView.postDelayed(() -> paintView.clear(), 100);
     }
 
     @Override
@@ -56,8 +64,10 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.clearId:
+                paintView.setDrawingColor(Color.WHITE);
                 break;
             case R.id.saveId:
+                paintView.saveImage();
                 break;
             case R.id.colorId:
                 showColorDialog();
@@ -79,6 +89,8 @@ public class MainActivity extends AppCompatActivity {
             case R.id.lineShape:
                 paintView.setStatus(4);
                 break;
+            case R.id.new_btn:
+                New();
         }
 
         if(item.getItemId() == R.id.clearId) {
@@ -86,6 +98,8 @@ public class MainActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+
 
     void showColorDialog() {
         currentAlerDialog = new AlertDialog.Builder(this);
@@ -133,7 +147,6 @@ public class MainActivity extends AppCompatActivity {
         setLineWidthButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getApplicationContext(), "Pidor", Toast.LENGTH_LONG).show();
                 paintView.setLineWidth(widthSeekbar.getProgress());
                 dialogLineWidth.dismiss();
                 currentAlerDialog = null;
@@ -197,4 +210,31 @@ public class MainActivity extends AppCompatActivity {
 
         }
     };
+
+    public void New() {
+
+        Intent photoPickerIntent = new Intent(Intent.ACTION_GET_CONTENT);
+        photoPickerIntent.setType("image/*");
+        startActivityForResult(photoPickerIntent, 800);
+
+    }
+
+    @Override
+    protected void onActivityResult(int reqCode, int resultCode, Intent data) {
+        super.onActivityResult(reqCode, resultCode, data);
+
+        if (resultCode == RESULT_OK) {
+            try {
+
+                final Uri imageUri = data.getData();
+                final InputStream imageStream = getContentResolver().openInputStream(imageUri);
+                final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+
+                paintView.loadFile(selectedImage);
+
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }
